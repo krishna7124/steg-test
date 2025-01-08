@@ -1,5 +1,4 @@
 cryptography
 pydub 
-wave
 image
 numy
