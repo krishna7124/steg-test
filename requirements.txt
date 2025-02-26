@@ -1,5 +1,5 @@
-streamlit==1.30.0
-numpy==1.23.5
-pillow==9.5.0
-cryptography==41.0.3
+streamlit
+numpy
+pillow
+cryptography
 pydub
