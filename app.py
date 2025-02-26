@@ -150,7 +150,7 @@ def main():
                 with open(output_image, "rb") as file:
                     st.download_button(label="Download Encoded Image", data=file, file_name=output_image, mime="image/png")
 
-           elif action == "Decode":
+        elif action == "Decode":
             st.subheader("Decoding Image")
             image_file = st.file_uploader("Choose an encoded image file", type=["png", "jpg", "jpeg"])
             key_input = st.text_input("Enter Encryption Key (for decoding)", "")
