@@ -18,18 +18,22 @@ def binary_to_message(binary):
     return bytes(int(byte, 2) for byte in bytes_data)
 
 def encode_image(image_path, message, key):
-    img = Image.open(image_path)
-    data = np.array(img)
+    img = Image.open(image_path).convert("RGB")  # Ensure RGB format
+    data = np.array(img, dtype=np.uint8)  # Explicitly convert to uint8
     encrypted_message = encrypt_message(message, key)
-    binary_message = message_to_binary(encrypted_message) + '1111111111111110'
+    binary_message = message_to_binary(encrypted_message) + '1111111111111110'  # End marker
     flat_data = data.flatten()
 
     for i, bit in enumerate(binary_message):
-        flat_data[i] = (flat_data[i] & ~1) | int(bit)
+        if i >= len(flat_data):  # Prevents index error
+            break
+        flat_data[i] = np.clip((flat_data[i] & ~1) | int(bit), 0, 255)  # Ensure valid range
 
-    new_data = flat_data.reshape(data.shape)
+    new_data = flat_data.reshape(data.shape).astype(np.uint8)  # Force uint8 before saving
     stego_img = Image.fromarray(new_data)
+
     return stego_img
+
 
 def decode_image(image_path, key):
     img = Image.open(image_path)
