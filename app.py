@@ -171,8 +171,8 @@ def main():
                         st.code(decoded_message)
                         copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
         
-                except Exception as e:
-                    st.error(f"Error: {str(e)}")
+                    except Exception as e:
+                        st.error(f"Error: {str(e)}")
             else:
                 st.error("Please provide the encryption key for decoding.")
 
