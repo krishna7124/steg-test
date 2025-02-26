@@ -119,8 +119,8 @@ def main():
                         copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
-                else:
-                    st.error("Please provide the encryption key for decoding.")
+            else:
+                st.error("Please provide the encryption key for decoding.")
 
     elif option == "Image":
         st.header("Image Steganography")
