@@ -3,7 +3,9 @@ import streamlit.components.v1 as components
 from cryptography.fernet import Fernet
 from modules import text_steganography as text_steg, image_steganography as img_steg, audio_steganography as audio_steg
 from PIL import Image
-import io
+
+# ✅ Set the page title and favicon
+st.set_page_config(page_title="Steganography Tool", page_icon="🔒", layout="wide")
 
 def copy_to_clipboard_button(text_to_copy, button_label):
     """Renders a styled button to copy text to the clipboard."""
@@ -30,18 +32,18 @@ def copy_to_clipboard_button(text_to_copy, button_label):
     components.html(custom_js, height=50)
 
 def main():
-    st.title("Steganography Tool")
+    st.title("🔒 Steganography Tool")
 
     # Sidebar for selecting type
-    option = st.sidebar.selectbox("Select Steganography Type", ("Text", "Audio", "Image"))
+    option = st.sidebar.selectbox("🔍 Select Steganography Type", ("Text", "Audio", "Image"))
 
     # Main content area
     if option == "Text":
-        st.header("Text Steganography")
+        st.header("📜 Text Steganography")
         action = st.radio("Choose Action", ("Encode", "Decode"))
 
         if action == "Encode":
-            st.subheader("Encoding Text")
+            st.subheader("🛠 Encoding Text")
             message = st.text_area("Enter the message to encode", "")
             base_text = st.text_area("Enter the base text", "")
 
@@ -49,16 +51,16 @@ def main():
                 key = Fernet.generate_key()
                 encoded_text = text_steg.encode_text(base_text, message, key)
                 
-                st.success("Encoded Text:")
+                st.success("✅ Encoded Text:")
                 st.code(encoded_text)
                 copy_to_clipboard_button(encoded_text, "Copy Encoded Message")
 
-                st.write("Encryption Key for Decoding:")
+                st.write("🔑 Encryption Key for Decoding:")
                 st.code(key.decode())
                 copy_to_clipboard_button(key.decode(), "Copy Key")
 
         elif action == "Decode":
-            st.subheader("Decoding Text")
+            st.subheader("🔓 Decoding Text")
             encoded_message = st.text_area("Enter the encoded text", "")
             key_input = st.text_input("Enter Encryption Key (for decoding)", "")
 
@@ -66,20 +68,20 @@ def main():
                 if key_input:
                     try:
                         decoded_message = text_steg.decode_text(encoded_message, key_input.encode())
-                        st.success("Decoded Message:")
+                        st.success("🔍 Decoded Message:")
                         st.code(decoded_message)
                         copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
                     except Exception as e:
-                        st.error(f"Error: {str(e)}")
+                        st.error(f"❌ Error: {str(e)}")
                 else:
-                    st.error("Please provide the encryption key for decoding.")
+                    st.error("⚠️ Please provide the encryption key for decoding.")
 
     elif option == "Image":
-        st.header("Image Steganography")
+        st.header("🖼 Image Steganography")
         action = st.radio("Choose Action", ("Encode", "Decode"))
 
         if action == "Encode":
-            st.subheader("Encoding Image")
+            st.subheader("🛠 Encoding Image")
             message = st.text_area("Enter the message to encode", "")
             image_file = st.file_uploader("Choose an image file", type=["png", "jpg", "jpeg"])
 
@@ -96,16 +98,16 @@ def main():
                 # ✅ Save the modified image
                 stego_image.save(output_image)
 
-                st.success("Image successfully encoded!")
-                st.write("Encryption Key for Decoding:")
+                st.success("✅ Image successfully encoded!")
+                st.write("🔑 Encryption Key for Decoding:")
                 st.code(key.decode())
                 copy_to_clipboard_button(key.decode(), "Copy Key")
 
                 with open(output_image, "rb") as file:
-                    st.download_button(label="Download Encoded Image", data=file, file_name=output_image, mime="image/png")
+                    st.download_button(label="📥 Download Encoded Image", data=file, file_name=output_image, mime="image/png")
 
         elif action == "Decode":
-            st.subheader("Decoding Image")
+            st.subheader("🔓 Decoding Image")
             image_file = st.file_uploader("Choose an encoded image file", type=["png", "jpg", "jpeg"])
             key_input = st.text_input("Enter Encryption Key (for decoding)", "")
 
@@ -115,13 +117,13 @@ def main():
 
                     try:
                         decoded_message = img_steg.decode_image(img, key_input.encode())
-                        st.success("Decoded Message:")
+                        st.success("🔍 Decoded Message:")
                         st.code(decoded_message)
                         copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
                     except Exception as e:
-                        st.error(f"Error: {str(e)}")
+                        st.error(f"❌ Error: {str(e)}")
                 else:
-                    st.error("Please provide the encryption key for decoding.")
+                    st.error("⚠️ Please provide the encryption key for decoding.")
 
 if __name__ == "__main__":
     main()
