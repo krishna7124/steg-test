@@ -150,27 +150,27 @@ def main():
                 with open(output_image, "rb") as file:
                     st.download_button(label="Download Encoded Image", data=file, file_name=output_image, mime="image/png")
 
-       elif action == "Decode":
-        st.subheader("Decoding Image")
-        image_file = st.file_uploader("Choose an encoded image file", type=["png", "jpg", "jpeg"])
-        key_input = st.text_input("Enter Encryption Key (for decoding)", "")
+           elif action == "Decode":
+            st.subheader("Decoding Image")
+            image_file = st.file_uploader("Choose an encoded image file", type=["png", "jpg", "jpeg"])
+            key_input = st.text_input("Enter Encryption Key (for decoding)", "")
 
-        if image_file and st.button("Decode"):
-            if key_input:
-                try:
-                    # ✅ Convert uploaded file to PIL Image before decoding
-                    img = Image.open(image_file).convert("RGB")
-    
-                    # ✅ Ensure the key is correctly formatted
-                    key = key_input.strip().encode()
-    
-                    # ✅ Call decode_image with correct inputs
-                    decoded_message = img_steg.decode_image(img, key)
-    
-                    st.success("Decoded Message:")
-                    st.code(decoded_message)
-                    copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
-    
+            if image_file and st.button("Decode"):
+                if key_input:
+                    try:
+                        # ✅ Convert uploaded file to PIL Image before decoding
+                        img = Image.open(image_file).convert("RGB")
+        
+                        # ✅ Ensure the key is correctly formatted
+                        key = key_input.strip().encode()
+        
+                        # ✅ Call decode_image with correct inputs
+                        decoded_message = img_steg.decode_image(img, key)
+        
+                        st.success("Decoded Message:")
+                        st.code(decoded_message)
+                        copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
+        
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
             else:
