@@ -56,10 +56,19 @@ def main():
         action = st.radio("Choose Action", ("Encode", "Decode"))
 
         if action == "Encode":
-            # Encoding Text
-            st.subheader("Encoding Text")
-            message = st.text_area("Enter the message to encode", "")
-            base_text = st.text_area("Enter the base text", "")
+            image_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
+            message = st.text_area("Enter the message")
+
+            if image_file is not None and st.button("Encode"):
+                img = Image.open(image_file).convert("RGB")  # Ensure proper format
+                generated_key = Fernet.generate_key()
+                stego_image = img_steg.encode_image(img, message, generated_key)  # Pass image object directly
+                stego_image.save("encoded_image.png")
+        
+                st.success("Image encoded successfully! Download it below.")
+                st.download_button("Download Encoded Image", data=open("encoded_image.png", "rb"), file_name="encoded_image.png")
+                st.write(f"Encryption Key: **{generated_key.decode()}**")
+
 
             # Display encryption key and encoded message
             if st.button("Encode"):
