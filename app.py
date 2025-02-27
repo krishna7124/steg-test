@@ -76,6 +76,58 @@ def main():
                 else:
                     st.error("⚠️ Please provide the encryption key for decoding.")
 
+    elif option == "Audio":
+        st.header("Audio Steganography")
+
+        # Display Encoding/Decoding options
+        action = st.radio("Choose Action", ("Encode", "Decode"))
+
+        if action == "Encode":
+            # Encoding Audio
+            st.subheader("Encoding Audio")
+            message = st.text_area("Enter the message to encode", "")
+            audio_file = st.file_uploader("Choose an audio file", type=["wav", "mp3"])
+
+            # Display encryption key for user to save
+            if audio_file is not None and st.button("Encode"):
+                output_audio = "encoded_audio.wav"
+
+                # Call your encoding function (audio_steg.encode_audio)
+                audio_steg.encode_audio(audio_file, message, generated_key, output_audio)
+
+                # Display success message
+                st.success(f"Audio file successfully encoded and saved as: {output_audio}")
+                st.write("Encryption Key for Decoding:")
+                st.code(generated_key.decode())
+                copy_to_clipboard_button(generated_key.decode(), "Copy Key")
+
+                # Enable download of the encoded audio file
+                with open(output_audio, "rb") as file:
+                    st.download_button(
+                        label="Download Encoded Audio",
+                        data=file,
+                        file_name=output_audio,
+                        mime="audio/wav"
+                    )
+
+        elif action == "Decode":
+            # Decoding Audio
+            st.subheader("Decoding Audio")
+            audio_file = st.file_uploader("Choose an encoded audio file", type=["wav"])
+
+            key_input = st.text_input("Enter Encryption Key (for decoding)", "")
+
+            if st.button("Decode") and audio_file is not None:
+                if key_input:
+                    try:
+                        decoded_message = audio_steg.decode_audio(audio_file, key_input.encode())
+                        st.success(f"Decoded Message: {decoded_message}")
+                        copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
+                    except Exception as e:
+                        st.error(f"Error: {str(e)}")
+                else:
+                    st.error("Please provide the encryption key for decoding.")
+
     elif option == "Image":
         st.header("🖼 Image Steganography")
         action = st.radio("Choose Action", ("Encode", "Decode"))
