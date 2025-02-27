@@ -34,33 +34,34 @@ def copy_to_clipboard_button(text_to_copy, button_label):
 def main():
     st.title("🔒 Steganography Tool")
 
-    # Sidebar selection
-    option = st.sidebar.selectbox("🔍 Select Steganography Type", ("Text", "Audio", "Image"))
-    action = st.radio("Choose Action", ("Encode", "Decode"))
+    # Sidebar for choosing encoding/decoding type
+    option = st.sidebar.selectbox("Select Steganography Type", ("Text", "Audio", "Image"))
 
-    # 🔹 TEXT STEGANOGRAPHY
+    # Initialize the encryption key
+    generated_key = Fernet.generate_key()
+
+    # ✅ TEXT STEGANOGRAPHY
     if option == "Text":
         st.header("📜 Text Steganography")
+        action = st.radio("Choose Action", ("Encode", "Decode"))
 
         if action == "Encode":
-            st.subheader("🛠 Encoding Text")
+            st.subheader("Encoding Text")
             message = st.text_area("Enter the message to encode", "")
             base_text = st.text_area("Enter the base text", "")
 
             if st.button("Encode"):
-                key = Fernet.generate_key()
-                encoded_text = text_steg.encode_text(base_text, message, key)
-
-                st.success("✅ Encoded Text:")
+                encoded_text = text_steg.encode_text(base_text, message, generated_key)
+                st.success("Encoded Text:")
                 st.code(encoded_text)
                 copy_to_clipboard_button(encoded_text, "Copy Encoded Message")
 
-                st.write("🔑 Encryption Key for Decoding:")
-                st.code(key.decode())
-                copy_to_clipboard_button(key.decode(), "Copy Key")
+                st.write("Encryption Key for Decoding:")
+                st.code(generated_key.decode())
+                copy_to_clipboard_button(generated_key.decode(), "Copy Key")
 
         elif action == "Decode":
-            st.subheader("🔓 Decoding Text")
+            st.subheader("Decoding Text")
             encoded_message = st.text_area("Enter the encoded text", "")
             key_input = st.text_input("Enter Encryption Key (for decoding)", "")
 
@@ -68,25 +69,25 @@ def main():
                 if key_input:
                     try:
                         decoded_message = text_steg.decode_text(encoded_message, key_input.encode())
-                        st.success("🔍 Decoded Message:")
+                        st.success("Decoded Message:")
                         st.code(decoded_message)
                         copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
                     except Exception as e:
-                        st.error(f"❌ Error: {str(e)}")
+                        st.error(f"Error: {str(e)}")
                 else:
-                    st.error("⚠️ Please provide the encryption key for decoding.")
+                    st.error("Please provide the encryption key for decoding.")
 
-    # 🔹 AUDIO STEGANOGRAPHY
+    # ✅ AUDIO STEGANOGRAPHY
     elif option == "Audio":
         st.header("🎵 Audio Steganography")
+        action = st.radio("Choose Action", ("Encode", "Decode"))
 
         if action == "Encode":
-            st.subheader("🛠 Encoding Audio")
+            st.subheader("Encoding Audio")
             message = st.text_area("Enter the message to encode", "")
             audio_file = st.file_uploader("Choose an audio file", type=["wav", "mp3"])
 
             if audio_file and st.button("Encode"):
-                key = Fernet.generate_key()
                 output_audio = "encoded_audio.wav"
 
                 # ✅ Process and save uploaded audio
@@ -94,18 +95,18 @@ def main():
                     f.write(audio_file.getbuffer())
 
                 # ✅ Call encode_audio function
-                audio_steg.encode_audio(audio_file.name, message, key, output_audio)
+                audio_steg.encode_audio(audio_file.name, message, generated_key, output_audio)
 
-                st.success("✅ Audio successfully encoded!")
-                st.write("🔑 Encryption Key for Decoding:")
-                st.code(key.decode())
-                copy_to_clipboard_button(key.decode(), "Copy Key")
+                st.success("Audio successfully encoded!")
+                st.write("Encryption Key for Decoding:")
+                st.code(generated_key.decode())
+                copy_to_clipboard_button(generated_key.decode(), "Copy Key")
 
                 with open(output_audio, "rb") as file:
-                    st.download_button(label="📥 Download Encoded Audio", data=file, file_name=output_audio, mime="audio/wav")
+                    st.download_button(label="Download Encoded Audio", data=file, file_name=output_audio, mime="audio/wav")
 
         elif action == "Decode":
-            st.subheader("🔓 Decoding Audio")
+            st.subheader("Decoding Audio")
             audio_file = st.file_uploader("Choose an encoded audio file", type=["wav"])
             key_input = st.text_input("Enter Encryption Key (for decoding)", "")
 
@@ -116,46 +117,46 @@ def main():
 
                     try:
                         decoded_message = audio_steg.decode_audio(audio_file.name, key_input.encode())
-                        st.success("🔍 Decoded Message:")
+                        st.success("Decoded Message:")
                         st.code(decoded_message)
                         copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
                     except Exception as e:
-                        st.error(f"❌ Error: {str(e)}")
+                        st.error(f"Error: {str(e)}")
                 else:
-                    st.error("⚠️ Please provide the encryption key for decoding.")
+                    st.error("Please provide the encryption key for decoding.")
 
-    # 🔹 IMAGE STEGANOGRAPHY
+    # ✅ IMAGE STEGANOGRAPHY
     elif option == "Image":
         st.header("🖼 Image Steganography")
+        action = st.radio("Choose Action", ("Encode", "Decode"))
 
         if action == "Encode":
-            st.subheader("🛠 Encoding Image")
+            st.subheader("Encoding Image")
             message = st.text_area("Enter the message to encode", "")
             image_file = st.file_uploader("Choose an image file", type=["png", "jpg", "jpeg"])
 
             if image_file and st.button("Encode"):
-                key = Fernet.generate_key()
                 output_image = "encoded_image.png"
 
                 # ✅ Convert uploaded file to PIL Image
                 img = Image.open(image_file).convert("RGB")
 
                 # ✅ Call encode_image with PIL Image object
-                stego_image = img_steg.encode_image(img, message, key)
+                stego_image = img_steg.encode_image(img, message, generated_key)
 
                 # ✅ Save the modified image
                 stego_image.save(output_image)
 
-                st.success("✅ Image successfully encoded!")
-                st.write("🔑 Encryption Key for Decoding:")
-                st.code(key.decode())
-                copy_to_clipboard_button(key.decode(), "Copy Key")
+                st.success("Image successfully encoded!")
+                st.write("Encryption Key for Decoding:")
+                st.code(generated_key.decode())
+                copy_to_clipboard_button(generated_key.decode(), "Copy Key")
 
                 with open(output_image, "rb") as file:
-                    st.download_button(label="📥 Download Encoded Image", data=file, file_name=output_image, mime="image/png")
+                    st.download_button(label="Download Encoded Image", data=file, file_name=output_image, mime="image/png")
 
         elif action == "Decode":
-            st.subheader("🔓 Decoding Image")
+            st.subheader("Decoding Image")
             image_file = st.file_uploader("Choose an encoded image file", type=["png", "jpg", "jpeg"])
             key_input = st.text_input("Enter Encryption Key (for decoding)", "")
 
@@ -165,13 +166,13 @@ def main():
 
                     try:
                         decoded_message = img_steg.decode_image(img, key_input.encode())
-                        st.success("🔍 Decoded Message:")
+                        st.success("Decoded Message:")
                         st.code(decoded_message)
                         copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
                     except Exception as e:
-                        st.error(f"❌ Error: {str(e)}")
+                        st.error(f"Error: {str(e)}")
                 else:
-                    st.error("⚠️ Please provide the encryption key for decoding.")
+                    st.error("Please provide the encryption key for decoding.")
 
 if __name__ == "__main__":
     main()
