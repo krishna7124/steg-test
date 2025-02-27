@@ -78,32 +78,31 @@ def main():
                     st.error("Please provide the encryption key for decoding.")
 
     # ✅ AUDIO STEGANOGRAPHY
-    elif option == "Audio":
-        st.header("🎵 Audio Steganography")
-        action = st.radio("Choose Action", ("Encode", "Decode"))
-
-        if action == "Encode":
-            st.subheader("Encoding Audio")
-            message = st.text_area("Enter the message to encode", "")
-            audio_file = st.file_uploader("Choose an audio file", type=["wav", "mp3"])
-
-            if audio_file and st.button("Encode"):
-                output_audio = "encoded_audio.wav"
-
-                # ✅ Process and save uploaded audio
-                with open(audio_file.name, "wb") as f:
-                    f.write(audio_file.getbuffer())
-
-                # ✅ Call encode_audio function
-                audio_steg.encode_audio(audio_file.name, message, generated_key, output_audio)
-
-                st.success("Audio successfully encoded!")
-                st.write("Encryption Key for Decoding:")
-                st.code(generated_key.decode())
-                copy_to_clipboard_button(generated_key.decode(), "Copy Key")
-
-                with open(output_audio, "rb") as file:
-                    st.download_button(label="Download Encoded Audio", data=file, file_name=output_audio, mime="audio/wav")
+    elif action == "Encode":
+        st.subheader("Encoding Audio")
+        message = st.text_area("Enter the message to encode", "")
+        audio_file = st.file_uploader("Choose an audio file", type=["wav", "mp3"])
+    
+        if audio_file and st.button("Encode"):
+            output_audio = "encoded_audio.wav"
+    
+            # ✅ Convert file to a temporary path for processing
+            temp_audio_path = f"temp_{audio_file.name}"
+    
+            with open(temp_audio_path, "wb") as f:
+                f.write(audio_file.getbuffer())
+    
+            # ✅ Call encode_audio using the temporary file path
+            audio_steg.encode_audio(temp_audio_path, message, generated_key, output_audio)
+    
+            st.success("Audio successfully encoded!")
+            st.write("🔑 Encryption Key for Decoding:")
+            st.code(generated_key.decode())
+            copy_to_clipboard_button(generated_key.decode(), "Copy Key")
+    
+            with open(output_audio, "rb") as file:
+                st.download_button(label="Download Encoded Audio", data=file, file_name=output_audio, mime="audio/wav")
+    
 
         elif action == "Decode":
             st.subheader("Decoding Audio")
