@@ -3,6 +3,7 @@ import streamlit.components.v1 as components
 from cryptography.fernet import Fernet
 from modules import text_steganography as text_steg, image_steganography as img_steg, audio_steganography as audio_steg
 from PIL import Image
+import os
 
 # ✅ Set browser tab title & icon
 st.set_page_config(page_title="Steganography Tool", page_icon="🔒", layout="wide")
@@ -36,11 +37,9 @@ def main():
 
     # Sidebar for choosing encoding/decoding type
     option = st.sidebar.selectbox("Select Steganography Type", ("Text", "Audio", "Image"))
-
-    # ✅ Define `action` before using it
     action = st.radio("Choose Action", ("Encode", "Decode"))
 
-    # ✅ Ensure all options correctly use `action`
+    # ✅ TEXT STEGANOGRAPHY
     if option == "Text":
         st.header("📜 Text Steganography")
 
@@ -52,23 +51,30 @@ def main():
             if st.button("Encode"):
                 key = Fernet.generate_key()
                 encoded_text = text_steg.encode_text(base_text, message, key)
-                
-                st.success("✅ Encoded Text:")
+
+                st.success("Encoded Text:")
                 st.code(encoded_text)
+                copy_to_clipboard_button(encoded_text, "Copy Encoded Message")
+
+                st.write("Encryption Key for Decoding:")
+                st.code(key.decode())
+                copy_to_clipboard_button(key.decode(), "Copy Key")
 
         elif action == "Decode":
-            st.subheader("🔓 Decoding Text")
+            st.subheader("Decoding Text")
             encoded_message = st.text_area("Enter the encoded text", "")
             key_input = st.text_input("Enter Encryption Key (for decoding)", "")
 
             if st.button("Decode") and key_input:
                 try:
                     decoded_message = text_steg.decode_text(encoded_message, key_input.encode())
-                    st.success("🔍 Decoded Message:")
+                    st.success("Decoded Message:")
                     st.code(decoded_message)
+                    copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
                 except Exception as e:
-                    st.error(f"❌ Error: {str(e)}")
+                    st.error(f"Error: {str(e)}")
 
+    # ✅ AUDIO STEGANOGRAPHY
     elif option == "Audio":
         st.header("🎵 Audio Steganography")
 
@@ -81,15 +87,24 @@ def main():
                 key = Fernet.generate_key()
                 output_audio = "encoded_audio.wav"
 
-                # ✅ Handle uploaded audio correctly
+                # ✅ Save uploaded file to a temporary location
                 temp_audio_path = f"temp_{audio_file.name}"
                 with open(temp_audio_path, "wb") as f:
                     f.write(audio_file.getbuffer())
 
+                # ✅ Encode the audio file
                 audio_steg.encode_audio(temp_audio_path, message, key, output_audio)
 
-                st.success("✅ Audio successfully encoded!")
+                # ✅ Remove temporary file
+                os.remove(temp_audio_path)
+
+                st.success("Audio successfully encoded!")
+                st.write("Encryption Key for Decoding:")
                 st.code(key.decode())
+                copy_to_clipboard_button(key.decode(), "Copy Key")
+
+                with open(output_audio, "rb") as file:
+                    st.download_button(label="Download Encoded Audio", data=file, file_name=output_audio, mime="audio/wav")
 
         elif action == "Decode":
             st.subheader("Decoding Audio")
@@ -97,16 +112,21 @@ def main():
             key_input = st.text_input("Enter Encryption Key (for decoding)", "")
 
             if audio_file and st.button("Decode") and key_input:
-                with open(audio_file.name, "wb") as f:
+                temp_audio_path = f"temp_{audio_file.name}"
+                with open(temp_audio_path, "wb") as f:
                     f.write(audio_file.getbuffer())
 
                 try:
-                    decoded_message = audio_steg.decode_audio(audio_file.name, key_input.encode())
-                    st.success("🔍 Decoded Message:")
+                    decoded_message = audio_steg.decode_audio(temp_audio_path, key_input.encode())
+                    st.success("Decoded Message:")
                     st.code(decoded_message)
+                    copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
                 except Exception as e:
-                    st.error(f"❌ Error: {str(e)}")
+                    st.error(f"Error: {str(e)}")
 
+                os.remove(temp_audio_path)
+
+    # ✅ IMAGE STEGANOGRAPHY
     elif option == "Image":
         st.header("🖼 Image Steganography")
 
@@ -119,12 +139,20 @@ def main():
                 key = Fernet.generate_key()
                 output_image = "encoded_image.png"
 
+                # ✅ Convert uploaded file to PIL Image
                 img = Image.open(image_file).convert("RGB")
+
+                # ✅ Encode the image
                 stego_image = img_steg.encode_image(img, message, key)
                 stego_image.save(output_image)
 
-                st.success("✅ Image successfully encoded!")
+                st.success("Image successfully encoded!")
+                st.write("Encryption Key for Decoding:")
                 st.code(key.decode())
+                copy_to_clipboard_button(key.decode(), "Copy Key")
+
+                with open(output_image, "rb") as file:
+                    st.download_button(label="Download Encoded Image", data=file, file_name=output_image, mime="image/png")
 
         elif action == "Decode":
             st.subheader("Decoding Image")
@@ -136,10 +164,11 @@ def main():
 
                 try:
                     decoded_message = img_steg.decode_image(img, key_input.encode())
-                    st.success("🔍 Decoded Message:")
+                    st.success("Decoded Message:")
                     st.code(decoded_message)
+                    copy_to_clipboard_button(decoded_message, "Copy Decoded Message")
                 except Exception as e:
-                    st.error(f"❌ Error: {str(e)}")
+                    st.error(f"Error: {str(e)}")
 
 if __name__ == "__main__":
     main()
