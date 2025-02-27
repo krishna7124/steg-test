@@ -128,7 +128,7 @@ def main():
 
     # ✅ IMAGE STEGANOGRAPHY
     elif option == "Image":
-        st.header("🖼 Image Steganography")
+        st.header("🖼️ Image Steganography")
 
         if action == "Encode":
             st.subheader("Encoding Image")
